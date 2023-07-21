@@ -1,0 +1,22 @@
+Bootstrap: docker
+
+From: nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
+
+%files
+    ./infer.py /infer.py
+    ./requirements.txt /requirements.txt
+    ./model.pt /model.pt
+
+%runscript
+    echo "Container was created"
+    echo "Arguments received: $*"
+    exec python3 /infer.py $@
+
+%post 
+    export DEBIAN_FRONTEND=noninteractive 
+
+    apt-get -qq -y update 
+
+    apt-get install -y python3.10 python3.10-distutils python3-pip python3-wheel
+    python3 -m pip install --upgrade pip
+    pip install -r /requirements.txt
