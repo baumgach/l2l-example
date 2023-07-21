@@ -9,6 +9,10 @@ network on the target task.
 A real submission will likely be more complex and probably contain multiple python
 modules, but this example should give you a good starting point.
 
+Please also note that in this example we aimed for clean and simple code, not runtime
+efficiency. A more efficient fine-tuning loop would allow for more steps and a larger,
+given the available evaluation time.
+
 ## How to replicate this example
 
 ### Prerequisites
