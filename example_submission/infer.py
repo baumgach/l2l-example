@@ -6,7 +6,8 @@ import torch
 import torch.nn as _nn
 import torchcross as tx
 import torchvision.models as _models
-from torch.utils.data import BatchSampler, RandomSampler
+from torch.utils.data import BatchSampler, RandomSampler, DataLoader
+from torchcross.data import TaskDescription
 from torchcross.models.lightning import SimpleCrossDomainClassifier
 
 
@@ -23,6 +24,7 @@ def main(args):
     result_path = args.result_path
 
     batch_size = 64
+    num_workers = 4
 
     hparams = {
         "lr": 1e-3,
@@ -38,24 +40,36 @@ def main(args):
     with open(task_path, "rb") as f:
         task = pickle.load(f)
 
-    support_datapoints = zip(*task.support)
+    task_description = TaskDescription(task.task_target, task.classes, "target")
+
+    # support_datapoints = list(zip(*task.support))
+    support_datapoints = task.support
 
     sampler = RandomSampler(support_datapoints)
     batch_sampler = BatchSampler(sampler, batch_size, drop_last=False)
-    collate_fn=tx.utils.collate_fn.stack,
+    collate_fn = tx.utils.collate_fn.stack
 
     batched_support_datapoints = [
-        (collate_fn([support_datapoints[i] for i in batch]), task.task_description)
+        (collate_fn([support_datapoints[i] for i in batch]), task_description)
         for batch in batch_sampler
     ]
+
+    target_train_dataloader = DataLoader(
+        batched_support_datapoints,
+        batch_size=None,
+        num_workers=num_workers,
+        collate_fn=tx.utils.collate_fn.identity,
+        pin_memory=True,
+    )
 
     target_trainer = pl.Trainer(inference_mode=False, max_epochs=100)
 
     # Fine-tune the model on the task`s support set
-    target_trainer.fit(model, batched_support_datapoints)
+    target_trainer.fit(model, target_train_dataloader, target_train_dataloader)
 
     # Get predictions on the query set
-    preds = model(task.query[0], task.task_description)
+    query_datapoints = tx.utils.collate_fn.stack(task.query)
+    preds = model(query_datapoints[0], task_description)
 
     with open(result_path, "wb") as f:
         pickle.dump(preds, f)
