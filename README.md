@@ -1,11 +1,12 @@
 # L2L Challenge Example Submission
 This is an example for how to prepare a valid submission for the MICCAI L2L Challenge
 
-It uses the [pretrained imagenet](https://github.com/StefanoWoerner/mimeta-pytorch/blob/master/examples/imagenet-pretrained.py)
+It is based on the [pretrained imagenet](https://github.com/StefanoWoerner/mimeta-pytorch/blob/master/examples/imagenet-pretrained.py)
 example from [MIMeta](https://github.com/StefanoWoerner/mimeta-pytorch)
-to process input images and generate predictions.
+and process input images and generates predictions by fine-tuning a pretrained
+network on the target task.
 
-Of course a real submission will be more complex and probably contain multiple python
+A real submission will likely be more complex and probably contain multiple python
 modules, but this example should give you a good starting point.
 
 ## How to replicate this example
