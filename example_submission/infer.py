@@ -62,7 +62,7 @@ def main(args):
         pin_memory=True,
     )
 
-    target_trainer = pl.Trainer(inference_mode=False, max_epochs=100)
+    target_trainer = pl.Trainer(inference_mode=False, max_epochs=100, enable_checkpointing=False, logger=False)
 
     # Fine-tune the model on the task`s support set
     target_trainer.fit(model, target_train_dataloader, target_train_dataloader)
